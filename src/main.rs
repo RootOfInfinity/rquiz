@@ -195,8 +195,8 @@ impl Quiz {
                     panic!("AHH!");
                 }
             };
-            buf = buf.trim().to_string();
-            if buf == card.fr {
+            buf = buf.trim().to_lowercase();
+            if buf == card.bk {
                 println!("Correct!");
                 println!();
                 correct += 1;
