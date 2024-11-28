@@ -35,6 +35,10 @@ impl Quiz {
         }
     }
     fn mult_choice_test(&self) {
+        if self.cards.len() < 4 {
+            println!("You need at least 4 cards to do Multiple Choice mode.");
+            return ();
+        }
         let mut quiz = self.clone();
         //shuffle it
         let mut temp: Vec<Card> = Vec::with_capacity(quiz.cards.len());
@@ -164,10 +168,6 @@ impl Quiz {
                 }
             }
         }
-        //THINGS LEFT TO DO:
-        //collect user input
-        //log incorrect answers
-        //make percentage of correct answers
     }
 }
 
