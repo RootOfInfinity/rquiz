@@ -169,6 +169,81 @@ impl Quiz {
             }
         }
     }
+    fn typing_test(&self) {
+        let mut quiz = self.clone();
+        let mut rng = thread_rng();
+        //shuffles the deck
+        let mut temp: Vec<Card> = vec![];
+        for _ in 0..quiz.cards.len() {
+            temp.push(quiz.cards.remove(rng.gen_range(0..quiz.cards.len())));
+        }
+        quiz.cards = temp;
+        struct IncorrectAnswer {
+            question: String,
+            wrong_ans: String,
+            correct_ans: String,
+        }
+        let mut wronglogs: Vec<IncorrectAnswer> = vec![];
+        let mut correct: i32 = 0;
+        for card in quiz.cards.iter() {
+            println!("What is on the back of: {}", card.fr);
+            let mut buf = String::from("");
+            match io::stdin().read_line(&mut buf) {
+                Ok(_o) => (),
+                Err(e) => {
+                    eprintln!("Error in reading user input. Error: {}", e);
+                    panic!("AHH!");
+                }
+            };
+            buf = buf.trim().to_string();
+            if buf == card.fr {
+                println!("Correct!");
+                println!();
+                correct += 1;
+            } else {
+                println!("Incorrect");
+                println!("A log of your incorrect answers will be available at the end.");
+                println!();
+                let temp = IncorrectAnswer {
+                    question: format!("What is on the back of: {}", card.fr),
+                    wrong_ans: buf,
+                    correct_ans: card.bk.clone(),
+                };
+                wronglogs.push(temp);
+            }
+        }
+        println!("Complete!");
+        println!("Stats: {}/{} correct or {}%", correct, quiz.cards.len(), {
+            correct as f64 / quiz.cards.len() as f64
+        });
+        if wronglogs.len() > 0 {
+            println!(
+                "It looks like you got some questions wrong, would you like to look at the logs?"
+            );
+            println!("1. yes\n2. no");
+            let choice = {
+                let mut temp = input_i32();
+                loop {
+                    if temp == 1 || temp == 2 {
+                        break;
+                    } else {
+                        temp = input_i32();
+                    }
+                }
+                temp
+            };
+            if choice == 2 {
+                println!("Sounds good, you probably know what you missed.");
+            } else {
+                for log in wronglogs {
+                    println!("Question: {}", log.question);
+                    println!("Your answer:\n{}", log.wrong_ans);
+                    println!("Right answer:\n{}", log.correct_ans);
+                    println!();
+                }
+            }
+        }
+    }
 }
 
 #[derive(Clone, PartialEq)]
@@ -207,5 +282,5 @@ fn main() {
     .expect("Not valid JSON!");
     let quiz: Quiz = Quiz::new(test_data);
     quiz.disp();
-    quiz.mult_choice_test();
+    quiz.typing_test();
 }
