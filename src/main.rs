@@ -1,6 +1,6 @@
 extern crate json;
 
-use std::fs;
+use std::{fs, io};
 
 use json::JsonValue;
 use rand::{thread_rng, Rng};
@@ -46,8 +46,19 @@ impl Quiz {
             );
         }
         quiz.cards = temp;
-        //cant use temp after this
-        //print front of card
+
+        //for saving incorrect values as a summary after the test
+        struct SavedIncorrect {
+            question: String,
+            right_ans_num: i32,
+            right_ans: String,
+            wrong_ans_num: i32,
+            wrong_ans: String,
+        }
+
+        let mut wronglogs: Vec<SavedIncorrect> = Vec::new();
+        let mut correct = 0;
+
         for card in &quiz.cards {
             println!("What is behind: {}", card.fr);
             let mut ansvec = vec![card.clone()];
@@ -70,6 +81,88 @@ impl Quiz {
                 println!("{}. {}", i + 1usize, c.bk);
             }
             println!();
+            let chosen = {
+                let mut temp = input_i32();
+                loop {
+                    if temp > 0 && temp <= 4 {
+                        break;
+                    } else {
+                        println!("Please choose a number between 1-4");
+                        temp = input_i32();
+                    }
+                }
+                temp
+            };
+            if ansvec[chosen as usize - 1].id == card.id {
+                //correct
+                println!("CORRECT!");
+                println!();
+                correct += 1;
+            } else {
+                //incorrect
+
+                let right_num = {
+                    let mut temp = None;
+                    for (i, coolcard) in ansvec.iter().enumerate() {
+                        if coolcard.id == card.id {
+                            temp = Some(i as i32);
+                            break;
+                        }
+                    }
+                    match temp {
+                        Some(n) => n + 1,
+                        None => panic!("Critical error, correct answer is not in ansvec"),
+                    }
+                };
+                let log = SavedIncorrect {
+                    question: format!("What is behind: {}", card.fr),
+                    right_ans_num: right_num,
+                    right_ans: card.bk.clone(),
+                    wrong_ans_num: chosen,
+                    wrong_ans: ansvec[chosen as usize - 1].bk.clone(),
+                };
+                wronglogs.push(log);
+                println!("Sorry bro, incorrect.");
+                println!("The answer was actually #{}: \"{}\"", right_num, card.bk);
+                println!("A log of your missed answers will be available at the end of the quiz.");
+                println!();
+            }
+        }
+        println!("You have completed the {} quiz", quiz.name);
+        println!("Stats: {}/{} correct, {}%", correct, quiz.cards.len(), {
+            let ans: f64;
+            ans = correct as f64 / quiz.cards.len() as f64;
+            ans
+        });
+        if wronglogs.len() > 0 {
+            println!(
+                "It looks like you got some answers wrong. Would you like to look at the logs?"
+            );
+            println!("1. yes\n2. no");
+            let choice = {
+                let mut temp = input_i32();
+                loop {
+                    if temp == 1 || temp == 2 {
+                        break;
+                    } else {
+                        temp = input_i32();
+                    }
+                }
+                temp
+            };
+            if choice == 2 {
+                println!("Sounds good, you probably know what you missed.");
+            } else {
+                for log in wronglogs {
+                    println!("Question: {}", log.question);
+                    println!("Your answer:\n{}. {}", log.wrong_ans_num, log.wrong_ans);
+                    println!(
+                        "The right answer:\n{}. {}",
+                        log.right_ans_num, log.right_ans
+                    );
+                    println!();
+                }
+            }
         }
         //THINGS LEFT TO DO:
         //collect user input
@@ -83,6 +176,26 @@ struct Card {
     id: i32,
     fr: String,
     bk: String,
+}
+
+fn input_i32() -> i32 {
+    print!("> ");
+    let mut buf = String::from("");
+    match io::stdin().read_line(&mut buf) {
+        Ok(_o) => (),
+        Err(e) => {
+            eprintln!("Error occured, invalid read of data: {}", e);
+            return input_i32();
+        }
+    };
+    let ans = match buf.trim().parse::<i32>() {
+        Ok(n) => n,
+        Err(e) => {
+            eprintln!("Not a valid number: {}", e);
+            input_i32()
+        }
+    };
+    ans
 }
 
 fn main() {
