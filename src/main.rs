@@ -340,6 +340,74 @@ impl Quiz {
             }
         }
     }
+    fn mixed_test(&self, mult_num: i32) {
+        let mut quiz = self.clone();
+        let mut rng = thread_rng();
+        //checks first
+        //simple implementation first
+        let mut temp = vec![];
+        for _ in 0..self.cards.len() {
+            temp.push(quiz.cards.remove(rng.gen_range(0..quiz.cards.len())));
+        }
+        quiz.cards = temp;
+        let mut correct = 0;
+        let mut wronglog: Vec<Wrong> = vec![];
+        for (i, card) in quiz.cards.iter().enumerate() {
+            if i < mult_num as usize {
+                match self.mult_choice(card.clone()) {
+                    Some(log) => wronglog.push(log),
+                    None => correct += 1,
+                }
+            } else {
+                match self.typing(card.clone()) {
+                    Some(log) => wronglog.push(log),
+                    None => correct += 1,
+                }
+            }
+        }
+
+        println!("Complete!");
+        println!("Stats: {}/{} correct or {}%", correct, quiz.cards.len(), {
+            correct as f64 / quiz.cards.len() as f64
+        });
+        if wronglog.len() > 0 {
+            println!(
+                "It looks like you got some questions wrong, would you like to look at the logs?"
+            );
+            println!("1. yes\n2. no");
+            let choice = {
+                let mut temp = input_i32();
+                loop {
+                    if temp == 1 || temp == 2 {
+                        break;
+                    } else {
+                        temp = input_i32();
+                    }
+                }
+                temp
+            };
+            if choice == 2 {
+                println!("Sounds good, you probably know what you missed.");
+            } else {
+                for log in wronglog {
+                    match log {
+                        Wrong::Mult(l) => {
+                            println!("Question: {}", l.question);
+                            println!("Your answer:\n{}. {}", l.wrong_ans_num, l.wrong_ans);
+                            println!("The right answer:\n{}. {}", l.right_ans_num, l.right_ans);
+                            println!();
+                        }
+                        Wrong::Type(l) => {
+                            println!("Question: {}", l.question);
+                            println!("Your answer:\n{}", l.wrong_ans);
+                            println!("Right answer:\n{}", l.correct_ans);
+                            println!();
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 #[derive(Clone, PartialEq)]
@@ -394,6 +462,5 @@ fn main() {
     .expect("Not valid JSON!");
     let quiz: Quiz = Quiz::new(test_data);
     quiz.disp();
-    quiz.mult_choice(quiz.cards[0].clone());
-    quiz.typing(quiz.cards[0].clone());
+    quiz.mixed_test(4);
 }
