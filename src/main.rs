@@ -34,8 +34,73 @@ impl Quiz {
             println!();
         }
     }
-    fn mult_choice(&self) -> Option<Wrong> {
-        todo!()
+    fn mult_choice(&self, anscard: Card) -> Option<Wrong> {
+        let mut rng = thread_rng();
+        let mut ansvec = vec![anscard.clone()];
+        for _ in 0..3 {
+            loop {
+                let ind = rng.gen_range(0..self.cards.len());
+                if !ansvec.contains(&self.cards[ind]) {
+                    ansvec.push(self.cards[ind].clone());
+                    break;
+                }
+            }
+        }
+        let mut temp = vec![];
+        for _ in 0..ansvec.len() {
+            temp.push(ansvec.remove(rng.gen_range(0..ansvec.len()) as usize));
+        }
+        ansvec = temp;
+        println!("What is on the back of: {}", anscard.fr);
+        for (i, card) in ansvec.iter().enumerate() {
+            println!("{}. {}", i + 1, card.bk);
+        }
+        let chosen = {
+            let mut temp = input_i32();
+            loop {
+                if temp > 0 && temp <= 4 {
+                    break;
+                } else {
+                    println!("Please choose a number between 1-4");
+                    temp = input_i32();
+                }
+            }
+            temp
+        };
+        if ansvec[chosen as usize - 1].id == anscard.id {
+            //correct
+            println!("CORRECT!");
+            println!();
+            return None;
+        } else {
+            //incorrect
+
+            let right_num = {
+                let mut temp = None;
+                for (i, coolcard) in ansvec.iter().enumerate() {
+                    if coolcard.id == anscard.id {
+                        temp = Some(i as i32);
+                        break;
+                    }
+                }
+                match temp {
+                    Some(n) => n + 1,
+                    None => panic!("Critical error, correct answer is not in ansvec"),
+                }
+            };
+            let log = Wrong::Mult(MultWrong {
+                question: format!("What is behind: {}", anscard.fr),
+                right_ans_num: right_num,
+                right_ans: anscard.bk.clone(),
+                wrong_ans_num: chosen,
+                wrong_ans: ansvec[chosen as usize - 1].bk.clone(),
+            });
+            println!("Sorry bro, incorrect.");
+            println!("The answer was actually #{}: \"{}\"", right_num, anscard.bk);
+            println!("A log of your missed answers will be available at the end of the quiz.");
+            println!();
+            return Some(log);
+        }
     }
     fn mult_choice_test(&self) {
         if self.cards.len() < 4 {
@@ -301,5 +366,5 @@ fn main() {
     .expect("Not valid JSON!");
     let quiz: Quiz = Quiz::new(test_data);
     quiz.disp();
-    quiz.typing_test();
+    quiz.mult_choice(quiz.cards[0].clone());
 }
