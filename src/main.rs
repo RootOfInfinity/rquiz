@@ -34,6 +34,9 @@ impl Quiz {
             println!();
         }
     }
+    fn mult_choice(&self) -> Option<Wrong> {
+        todo!()
+    }
     fn mult_choice_test(&self) {
         if self.cards.len() < 4 {
             println!("You need at least 4 cards to do Multiple Choice mode.");
@@ -253,6 +256,22 @@ struct Card {
     bk: String,
 }
 
+enum Wrong {
+    Mult(MultWrong),
+    Type(TypeWrong),
+}
+struct MultWrong {
+    question: String,
+    right_ans_num: i32,
+    right_ans: String,
+    wrong_ans_num: i32,
+    wrong_ans: String,
+}
+struct TypeWrong {
+    question: String,
+    wrong_ans: String,
+    correct_ans: String,
+}
 fn input_i32() -> i32 {
     print!("> ");
     let mut buf = String::from("");
