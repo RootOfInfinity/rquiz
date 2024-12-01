@@ -237,6 +237,34 @@ impl Quiz {
             }
         }
     }
+    fn typing(&self, anscard: Card) -> Option<Wrong> {
+        println!("What is on the back of: {}", anscard.fr);
+
+        let mut buf = String::from("");
+        match io::stdin().read_line(&mut buf) {
+            Ok(_o) => (),
+            Err(e) => {
+                eprintln!("Error in reading user input. Error: {}", e);
+                panic!("AHH!");
+            }
+        };
+        buf = buf.trim().to_lowercase();
+        if buf == anscard.bk.to_lowercase() {
+            println!("Correct!");
+            println!();
+            return None;
+        } else {
+            println!("Incorrect");
+            println!("A log of your incorrect answers will be available at the end.");
+            println!();
+            let log = Wrong::Type(TypeWrong {
+                question: format!("What is on the back of: {}", anscard.fr),
+                wrong_ans: buf,
+                correct_ans: anscard.bk.clone(),
+            });
+            return Some(log);
+        }
+    }
     fn typing_test(&self) {
         let mut quiz = self.clone();
         let mut rng = thread_rng();
@@ -367,4 +395,5 @@ fn main() {
     let quiz: Quiz = Quiz::new(test_data);
     quiz.disp();
     quiz.mult_choice(quiz.cards[0].clone());
+    quiz.typing(quiz.cards[0].clone());
 }
