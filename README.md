@@ -11,4 +11,7 @@ Definatly unfinished.
 Things I need to do:
 * seperate "multiple choice" and "typing" questions into functions 
 so I can make them combine together in cool ways -- DONE!
-* add cool command line ablilty to select a file to use instead of doing it from "tests/quiz1.json"
+* add cool command line ablilty to select a file to use instead of doing it from "tests/quiz1.json" -- DONE!
+* add default folder path with a config file
+* make ability to create json quizzes
+
