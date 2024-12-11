@@ -1,6 +1,9 @@
 extern crate json;
 
-use std::{fs, io};
+use std::{
+    fs,
+    io::{self, Write},
+};
 
 use json::JsonValue;
 use rand::{thread_rng, Rng};
@@ -104,7 +107,8 @@ impl Quiz {
     }
 
     fn typing(&self, anscard: Card) -> Option<Wrong> {
-        println!("What is on the back of: {}", anscard.fr);
+        print!("What is on the back of: {}\n?> ", anscard.fr);
+        io::stdout().flush();
 
         let mut buf = String::from("");
         match io::stdin().read_line(&mut buf) {
@@ -231,6 +235,7 @@ struct TypeWrong {
 }
 fn input_i32() -> i32 {
     print!("> ");
+    io::stdout().flush();
     let mut buf = String::from("");
     match io::stdin().read_line(&mut buf) {
         Ok(_o) => (),
@@ -250,13 +255,21 @@ fn input_i32() -> i32 {
 }
 
 fn main() {
-    let path = std::env::args()
-        .nth(1)
-        .expect("Could not find the argument.");
-    println!("{}", path);
-    let test_data = json::parse(fs::read_to_string(path).expect("no file in sight").as_str())
-        .expect("Not valid JSON!");
-    let quiz: Quiz = Quiz::new(test_data);
-    quiz.disp();
-    quiz.mixed_test(4);
+    if std::env::args().nth(1) == Some("quiz".to_string()) {
+        let path = std::env::args()
+            .nth(2)
+            .expect("Could not find the argument.");
+        println!("{}", path);
+        let test_data = json::parse(fs::read_to_string(path).expect("no file in sight").as_str())
+            .expect("Not valid JSON!");
+        let quiz: Quiz = Quiz::new(test_data);
+        quiz.mixed_test(4);
+    } else if std::env::args().nth(1) == Some("make".to_string()) {
+        //start quiz maker`
+        print!("First of all, name of quiz?\n?> ");
+        io::stdout().flush();
+        let mut buf = String::from("");
+        io::stdin().read_line(&mut buf);
+        println!("{}", buf);
+    }
 }
