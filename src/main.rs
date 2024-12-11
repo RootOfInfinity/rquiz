@@ -250,12 +250,12 @@ fn input_i32() -> i32 {
 }
 
 fn main() {
-    let test_data = json::parse(
-        fs::read_to_string("./tests/quiz1.json")
-            .expect("no file in sight")
-            .as_str(),
-    )
-    .expect("Not valid JSON!");
+    let path = std::env::args()
+        .nth(1)
+        .expect("Could not find the argument.");
+    println!("{}", path);
+    let test_data = json::parse(fs::read_to_string(path).expect("no file in sight").as_str())
+        .expect("Not valid JSON!");
     let quiz: Quiz = Quiz::new(test_data);
     quiz.disp();
     quiz.mixed_test(4);
