@@ -160,7 +160,11 @@ impl Quiz {
 
         println!("Complete!");
         println!("Stats: {}/{} correct or {}%", correct, quiz.cards.len(), {
-            correct as f64 / quiz.cards.len() as f64
+            if (correct as f64 / quiz.cards.len() as f64) < 1.0 {
+                (correct as f64 / quiz.cards.len() as f64) * 100.0
+            } else {
+                100.0
+            }
         });
         if wronglog.len() > 0 {
             println!(
