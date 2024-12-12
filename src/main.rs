@@ -268,8 +268,14 @@ fn main() {
         //start quiz maker`
         print!("First of all, name of quiz?\n?> ");
         io::stdout().flush();
-        let mut buf = String::from("");
-        io::stdin().read_line(&mut buf);
-        println!("{}", buf);
+        let mut name = String::from("");
+        io::stdin().read_line(&mut name);
+        println!("How many questions?");
+        io::stdout().flush();
+        let num = input_i32();
+        if num < 0 {
+            panic!()
+        }
+        // get flashcards
     }
 }
