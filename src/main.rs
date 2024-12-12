@@ -277,5 +277,52 @@ fn main() {
             panic!()
         }
         // get flashcards
+        let mut flashes = vec![];
+        for n in 0..num {
+            flashes.push(Card {
+                fr: {
+                    print!("Card#{} front:\n?> ", n + 1);
+                    io::stdout().flush();
+                    let mut buf = String::from("");
+                    io::stdin().read_line(&mut buf);
+                    buf
+                }
+                bk: {
+                    print!("Card#{} back:\n?> ", n + 1);
+                    io::stdout().flush();
+                    let mut buf = String::from("");
+                    io::stdin().read_line(&mut buf);
+                    buf
+                
+                }
+            });
+        }
+        let mut string = format!("{ name = \"{}\", cards = { {}", name, num);
+        for card in flashes {
+            string = format!("{}, { fr = \"{}\", bk = \"{}\" }", string, card.fr, card.bk);
+        }
+        string = format!("{} } }", string);
+        //write string to file.
+        /*
+        {
+            name = "name",
+            cards = {
+                2,
+                {
+                    fr = "example",
+                    bk = "cool example"
+                },
+                {
+                    fr = "amazing example",
+                    bk = "better example"
+                }
+            }
+            
+        }
+         
+          
+           
+            
+         */
     }
 }
